@@ -19,3 +19,23 @@ CREATE TABLE public.currencies (
 	currency_with_div numeric(5, 3) NULL
 );
 CREATE INDEX currencies_currency_code_idx ON public.currencies USING btree (currency_code);
+
+
+WITH raw AS (
+	SELECT *
+	FROM public.transactions t 
+	WHERE 
+		t.status = 'done' AND 
+		t.account_number_from > 0 AND
+		t.account_number_to > 0 AND 
+		t.transaction_type IN (
+			'c2a_incoming',
+	        'c2b_partner_incoming',
+	        'sbp_incoming',
+	        'sbp_outgoing',
+	        'transfer_incoming',
+	        'transfer_outgoing'
+	     )
+)
+SELECT * 
+FROM raw
