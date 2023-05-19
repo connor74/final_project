@@ -39,3 +39,44 @@ WITH raw AS (
 )
 SELECT * 
 FROM raw
+
+
+------------------------------------------------------------------
+
+WITH raw AS (
+	SELECT *
+	FROM public.transactions t 
+	WHERE 
+		t.status = 'done' AND 
+		t.account_number_from > 0 AND
+		t.account_number_to > 0 AND 
+		t.transaction_type IN (
+			'c2a_incoming',
+	        'c2b_partner_incoming',
+	        'sbp_incoming',
+	        'sbp_outgoing',
+	        'transfer_incoming',
+	        'transfer_outgoing'
+	     )
+), pay_to AS (
+	SELECT 
+		account_number_from,
+		currency_code,
+		country 
+	FROM raw
+)
+SELECT
+	raw.operation_id,
+	raw.transaction_dt,
+	raw.account_number_from,
+	raw.account_number_to,
+	raw.currency_code AS currency_code_from,
+	pay_to.currency_code AS currency_code_to,
+	raw.country AS country_from,
+	pay_to.country AS country_to,
+	raw.status,
+	raw.transaction_type,
+	raw.amount
+FROM raw  
+LEFT JOIN pay_to 
+	ON raw.account_number_to = pay_to.account_number_from
